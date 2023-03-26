@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  database:
+    ports:
+      - "3306:3306"
+#    volumes:
+#      - ./data/typesense.sql:/docker-entrypoint-initdb.d/99-typesense.sql
+#      - ./docker/database/data:/var/lib/mysql:rw
+
+  adminer:
+    ports:
+      - "8080:8080"
+
+  typesense:
+    ports:
+      - "8108:8108"
+#    volumes:
+#      - ./docker/typesense/typesense-server-data:/data

@@ -1,0 +1,145 @@
+base:
+
+  spam:
+    akismet: "%env(AKISMET_KEY)%"
+
+  uploader:
+    warmup: true
+    formats:
+      - { width: 250, height: 250 }
+      - { width: 500, height: 500 }
+      - { width: 1000, height: 1000 }
+      - { width: 2000, height: 2000 }
+
+  images:
+    debug: false
+    disable_profiler: true
+    warmup: true
+    enable_webp: true
+    fallback: true
+
+    no_image:
+      - { extension: "jpg", path: "%kernel.project_dir%/public/bundles/base/images/image.jpg" }
+      - { extension: "png", path: "%kernel.project_dir%/public/bundles/base/images/image.svg" }
+      - { extension: "svg", path: "%kernel.project_dir%/public/bundles/base/images/image.png" }
+
+    max_resolution: Base\Imagine\Filter\Basic\Definition\UltraHighDefinitionFilter
+    max_quality: 0.8
+    autorotate: true
+    timeout: 240
+
+  paginator:
+    page_range: 1
+    page_size: 10
+    page_parameter: "page"
+
+  site:
+    index: "app_index"
+    maintenance:
+      redirect_on_deny: security_maintenance
+      lockpath: '%kernel.project_dir%/public/maintenance.lock'
+
+  access_restriction:
+
+    redirect_on_deny: security_rescue
+    firewalls:
+      - 'main'
+    exceptions:
+      - { host: '^([^\.]*)\.{0,1}s\.(.*)' }
+      - { host: '^([^\.]*)\.{0,1}feed\.(.*)' }
+      - { host: '^beta\.(.*)', path: '^\/shop\/[a-zA-Z0-9-]+\/wallpaper\/[a-zA-Z0-9-]+[\/]?$' }
+      - { host: '^beta\.(.*)', path: '^\/boutique\/[a-zA-Z0-9-]+\/papier\-peint\/[a-zA-Z0-9-]+[\/]?$' }
+      - { host: '^www\.(.*)', path: '^\/shop\/[a-zA-Z0-9-]+\/wallpaper\/[a-zA-Z0-9-]+[\/]?$' }
+      - { host: '^www\.(.*)', path: '^\/boutique\/[a-zA-Z0-9-]+\/papier\-peint\/[a-zA-Z0-9-]+[\/]?$' }
+
+  router:
+    use_custom: true
+    ip_access: false
+
+    keep_machine: '%env(bool:HTTP_KEEPMACHINE)%'
+    keep_subdomain: '%env(bool:HTTP_KEEPSUBDOMAIN)%'
+    permitted_hosts:
+      - { regex: '^([^\.]*)\.{0,1}feed.%env(HTTP_DOMAIN)%$' }
+      - { regex: '^([^\.]*)\.{0,1}s.%env(HTTP_DOMAIN)%$' }
+      - { regex: '^%env(HTTP_SUBDOMAIN)%\.{0,1}%env(HTTP_DOMAIN)%$' }
+
+    fallbacks:
+      - { domain: '%env(HTTP_DOMAIN)%', subdomain: '%env(HTTP_SUBDOMAIN)%', base_dir: '%env(HTTP_BASEDIR)%' }
+
+  notifier:
+    technical_loopback: '%env(bool:MAILER_LOOPBACK)%'
+    technical_recipient: { email: "noreply@%env(HTTP_DOMAIN)%" }
+    admin_role: "ROLE_EDITOR"
+    test_recipients:
+      - '@(?:local|localhost|localhost\.local)$'
+      - '@example.org$'
+
+    options:
+      - { channel: "email",    markAsRead: false }
+      - { channel: "email+",   markAsRead: false }
+      - { channel: "browser+", markAsRead: true }
+      - { channel: "discord",  markAsRead: true }
+
+  twig:
+
+    use_custom: true
+    use_form2: true
+    use_bootstrap: true
+
+    default_path: '%kernel.project_dir%/vendor/glitchr/base-bundle/templates'
+    form_themes:
+      - '@Base/form/form_div_layout.html.twig'
+
+    script_attributes:
+      defer: true
+      async: false
+
+    link_attributes:
+      defer: true
+      async: false
+
+    breakpoints:
+      - { 'name': 'laptop' }
+      - { 'name': 'laptop'          , 'media': 'all and (min-width: 1025px) and (max-width: 1280px)' }
+      - { 'name': 'mobile'          , 'media': 'all and (max-width: 470px)' }
+      - { 'name': 'mobile-landscape', 'media': 'all and (max-width: 470px) and (orientation: landscape)' }
+      - { 'name': 'tablet'          , 'media': 'all and (min-width: 471px) and (max-width: 1024px)' }
+      - { 'name': 'tablet-landscape', 'media': 'all and (min-width: 471px) and (max-width: 1024px) and (orientation: landscape)' }
+      - { 'name': 'desktop'         , 'media': 'all and (min-width: 1281px)' }
+
+    paths:
+      - { path: '%kernel.project_dir%/templates/layout' }
+      - { path: '%kernel.project_dir%/templates/layout', namespace: "Layout" }
+
+  parameter_bag:
+    use_hot_bag: true
+    use_setting_bag: true
+
+  annotations:
+    use_custom: True
+    paths:
+      - '%kernel.project_dir%/src/Annotation'
+
+  extension:
+
+    max_revisions: 5
+    empty_trash: "+7 days"
+
+    logging_default_expiry: "+30 days"
+    logging:
+      - { event: "kernel.exception", statusCode: "^(?!(?:404)$)\\d+$", expiry: "+1 hour" }
+      - { event: "security.authentication.success" }
+
+  user:
+    token_default_throttling: 3*60
+
+    register:
+      autoapprove: False
+      notify_admins: True
+
+    identifier: "firstname"
+    notifications:
+      expiry: "+30 days"
+
+  database:
+    use_custom: true

@@ -1,92 +1,189 @@
-# ArrayType
+# .env
 
+If you need to override env variables for your specific needs, do not edit .env or .env.dev directly.
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+Instead, prefer a new `.env.dev.local` file to overrive onl what's nedded. This file MUST NOT be commited
 
 ```
-cd existing_repo
-git remote add origin ssh://git@gitlab.glitchr.dev/public-repository/symfony/demo/array-type.git
-git branch -M main
-git push -uf origin main
+touch .env.dev.local
 ```
 
-## Integrate with your tools
+# Docker (Optionnal)
 
-- [ ] [Set up project integrations](http://gitlab.glitchr.dev/public-repository/symfony/demo/array-type/-/settings/integrations)
+If you want to use docker, (local db and/or typesense)
 
-## Collaborate with your team
+Duplicate `docker-compose.override` and edit as needed specific config (ports, volumes, ...)
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```
+cp docker-compose.override.dist.yml docker-compose.override.yml
+```
 
-## Test and Deploy
+Then run containers
 
-Use the built-in continuous integration in GitLab.
+```
+docker compose up
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Database will be accessible (by default) from `http://localhost:8080`
 
-***
+# DB Setup
 
-# Editing this README
+Import database dump (Update credentials as needed)
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```
+mysql -h 127.0.0.1 -u root -proot typesense < data/typesense.sql  
+```
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+Default base containes approx. 170 products
 
-## Name
-Choose a self-explaining name for your project.
+# Setup
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```
+composer install
+symfony server:start
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# Files
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Pour info, dans le dossier ./public/storage se trouve les image brutes des produits
+A priori, tu ne t'en serviras que dans une deuxieme phase, si l'on met en place la partie frontend.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+# Makefile
+
+NB: Il y a un makefile dans la racine du projet. Pour nettoyer le cache tu peux juster lancer "make" ou sinon les commandes symfony habituelles
+
+# Dependencies
+
+Le projet inclue un bundle glitchr/base-bundle qui ajoute quelques fonctionnalites que j'ai developpe au fil du temps.
+Ce bundle inclue quelques entites que j'utilise et dont les produits dependent pour alleger la couche application.
+
+La base de donnee est en inheritage join avec une discriminator map
+Notre philosophie est que le code doit etre facile a utiliser. 
+Donc j'injecte des services directement dans les entites.
+
+NB: Concernant le cache, j'ai volontairement desactivé le secondary cache layer de la BDD.
+
+# Typesense
+
+## Fork 
+
+To work on the lib, create an issues and an MR, and checkout localy the branch.
+
+In your composer.json add the folowing lines (edit path)
+```
+    "repositories": [{
+        "type": "path",
+        "url": "../typesense-api"
+    }],  
+```
+
+Then change the target version desired, ("dev-" followed by the branche name) : 
+
+```
+    "glitchr/ux-typesense": "dev-1-add-infix-parameter"
+```
+
+And update
+
+```
+composer update glitchr/ux-typesense
+```
+
+## Configuration
+
+In the .env file, configure the following keys : 
+
+```
+TYPESENSE_URL=https://vdy7jh6maispogb8p-1.a1.typesense.net:443 # Don't forget the port number
+TYPESENSE_API_KEY="INSERT API KEY HERE"
+```
+
+## Indexation
+
+To create/update collection : 
+
+```
+symfony console typesense:create
+```
+
+To force indexation : 
+
+```
+symfony console typesense:import
+```
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Route : `app_typesense`
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Url : `/ux`
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Params : 
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+`q` : Query
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+`filter` : Facet filtering
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+`p` : Page to load
 
-## License
-For open source projects, say how it is licensed.
+### Simple search
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Search for products with "mur" : `/ux?q=mur`
+
+### Pagination
+
+Pagination is given in the result.
+
+```
+  "pagination": {
+    "current": 1,
+    "previousLink": null,
+    "nextLink": "http://localhost/index.php/ux?q=mur&p=2",
+    "totalPages": 2
+  },
+```
+
+`current` : Current page number
+
+`totalPages` : Total page count
+
+In order to go to the next page, follow the `nextLink` value. Same for going back to previous page.
+
+### Facets
+
+Facets are returned in the result.
+
+```
+"facets": [
+    {
+      "counts": [
+        {
+          "count": 15,
+          "highlighted": "Mur végétal",
+          "value": "Mur végétal"
+        },
+        {
+          "count": 5,
+          "highlighted": "Blanc",
+          "value": "Blanc"
+        },
+        [...]
+        {
+          "count": 2,
+          "highlighted": "Papier peint tropical et fleuri",
+          "value": "Papier peint tropical et fleuri"
+        }
+      ],
+      "field_name": "keywords",
+      "stats": {
+        "total_values": 18
+      }
+    }
+  ],
+```
+
+If we only want results for keyword "Blanc", we have the `filter` param.
+
+Fill it with the facet name (keywords in our example) followed by the value : 
+
+`/ux?q=mur&filter=keywords:Blanc`

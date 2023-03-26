@@ -1,0 +1,40 @@
+# Read the documentation at https://github.com/thephpleague/flysystem-bundle/blob/master/docs/1-getting-started.md
+flysystem:
+    storages:
+
+        local.cache:
+            adapter: 'local'
+            options:
+                directory: '%kernel.project_dir%/var/cache/%kernel.environment%/images'
+        local.cache.public:
+            adapter: 'local'
+            options:
+                directory: '%kernel.project_dir%/public/images'
+
+        local.storage:
+            adapter: 'local'
+            options:
+                directory: '%kernel.project_dir%/data/storage'
+        local.storage.public:
+            adapter: 'local'
+            options:
+                directory: '%kernel.project_dir%/public/storage'
+
+        backup.local:
+            adapter: 'local'
+            options:
+                directory: '%kernel.project_dir%/public/storage'
+
+        backup.glitchr:
+            adapter: 'ftp'
+            options:
+                host: 'nas.glitchr.io'
+                username: 'backup'
+                password: ''
+                port: 2222
+                root: '/volume1/backup/ovh/'
+                passive: true
+                ssl: true
+                timeout: 30
+                ignore_passive_address: ~
+                utf8: false

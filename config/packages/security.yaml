@@ -1,0 +1,100 @@
+security:
+    password_hashers:
+        Base\Entity\User:
+            algorithm: auto
+
+    # Role hierarchy
+    role_hierarchy:
+
+      PUBLIC_ACCESS: ROLE_ALLOWED_TO_SWITCH
+      ROLE_ADMIN: ROLE_USER
+      ROLE_SUPERADMIN: ROLE_ADMIN
+
+    providers: # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+        users: { entity: { class: App\Entity\User, property: 'email' } } # User entity
+        hwi: { id: Base\Security\UserProvider } # Social networks
+        #in_memory: { memory: null }
+
+    firewalls:
+        dev:
+          pattern: ^/(_wdt|_profiler)/
+          security: false
+
+        rescue:
+
+          context: common
+          provider: users
+          lazy: true
+
+          pattern: ^/(rescue|backoffice|bureau)
+          user_checker: Base\Security\UserChecker
+
+          remember_me:
+            # 1 week in seconds
+            lifetime: 604800
+            secret: '%kernel.secret%'
+            path: /
+            domain: .%env(HTTP_DOMAIN)%
+
+          custom_authenticator:
+            - Base\Security\LoginFormAuthenticator
+            - Base\Security\RescueFormAuthenticator
+
+          # allow authentication using a form or HTTP basic
+          http_basic: ~
+          entry_point: Base\Security\RescueFormAuthenticator
+
+          form_login:
+            use_referer: true
+
+            default_target_path: /backoffice
+            login_path: /rescue
+            check_path: /rescue
+            failure_path: /rescue
+            use_forward: false
+
+          logout:
+            path: security_logoutRequest
+            target: /
+
+        main:
+
+          switch_user: { role: PUBLIC_ACCESS, parameter: _switch }
+#          switch_user: { parameter: X-Switch-User }
+          context: common
+          provider: users
+          lazy: true
+
+          remember_me:
+            # 1 week in seconds
+            lifetime: 604800
+            secret: '%kernel.secret%'
+            path: /
+            domain: .%env(HTTP_DOMAIN)%
+
+          pattern: ^/
+          user_checker: Base\Security\UserChecker
+
+          custom_authenticator:
+            - Base\Security\LoginFormAuthenticator
+            - Base\Security\RescueFormAuthenticator
+
+          # allow authentication using a form or HTTP basic
+          http_basic: ~
+          entry_point: Base\Security\LoginFormAuthenticator
+          form_login:
+            use_referer: true
+
+          logout:
+            path: security_logoutRequest
+            target: security_logout
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+      - { path: ^/rescue,     roles: PUBLIC_ACCESS }
+      - { path: ^/api,        roles: ROLE_EDITOR }
+      - { path: ^/_profiler,  roles: ROLE_EDITOR }
+      - { path: ^/_wdt,       roles: PUBLIC_ACCESS }
+      - { path: ^/login,       roles: PUBLIC_ACCESS }
+      - { path: ^/(backoffice|bureau), roles: ROLE_ADMIN }

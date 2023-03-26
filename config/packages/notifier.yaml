@@ -1,0 +1,23 @@
+framework:
+    notifier:
+        chatter_transports:
+            discord: 'discord://%env(DISCORD_TOKEN)%@default?webhook_id=%env(DISCORD_WEBHOOK)%'
+
+        channel_policy:
+            # use chat/slack, chat/telegram, sms/twilio or sms/nexmo
+            urgent: ['email', 'sms', 'chat/discord']
+            high:   ['email', 'sms', 'chat/discord']
+            medium: ['email', 'chat/discord']
+            low:    ['chat/discord']
+
+            default: ["email+", "browser+"]
+            email: ['email+']
+            sms: ['sms']
+
+            info: ['browser+']
+            warning: ['browser+']
+            success: ['browser+']
+            danger: ['browser+']
+
+        # admin_recipients:
+            # - { email: "support@apfelschorlette.fr" }

@@ -1,0 +1,8 @@
+app_controller:
+    resource: "../../src/Controller"
+    type: annotation
+
+base_controller:
+    resource: "@BaseBundle/Controller"
+    type: annotation
+    prefix: /

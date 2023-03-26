@@ -1,0 +1,55 @@
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                host:     '%env(resolve:DOCTRINE_DATABASE_HOST)%'
+                port:     '%env(DOCTRINE_DATABASE_PORT)%'
+                user:     '%env(DOCTRINE_DATABASE_USER)%'
+                password: '%env(DOCTRINE_DATABASE_PASSWORD)%'
+                dbname:   '%env(DOCTRINE_DATABASE)%'
+
+                driver: 'pdo_mysql'
+                charset: utf8
+                default_table_options:
+                    charset: utf8
+                    collate: utf8_unicode_ci
+
+    orm:
+        dql:
+            numeric_functions:
+                rand: Base\Database\Function\Rand
+
+        second_level_cache:
+            enabled: true
+            region_cache_driver:
+                type: pool
+                pool: cache.adapter
+
+        quote_strategy: doctrine.orm.quote_strategy.default
+        naming_strategy: doctrine.orm.naming_strategy.camel
+        class_metadata_factory_name: Base\Database\Mapping\Factory\ClassMetadataFactory
+
+        auto_mapping: true
+        auto_generate_proxy_classes: false
+        metadata_cache_driver:
+            type: pool
+            pool: doctrine.system_cache_pool
+        query_cache_driver:
+            type: pool
+            pool: doctrine.system_cache_pool
+        result_cache_driver: # be careful with that one :)
+            type: pool
+            pool: doctrine.result_cache_pool
+
+        mappings:
+            App:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+
+        filters:
+            trash_filter: Base\Database\Filter\TrashFilter
+            vault_filter: Base\Database\Filter\VaultFilter
