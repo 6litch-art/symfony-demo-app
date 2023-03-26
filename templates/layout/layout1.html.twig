@@ -1,0 +1,19 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+    {% block main %}
+        <main>
+            {% set content = block("content") is defined ? block("content") : null %}
+            {% if content is defined and content is not empty %}
+                {{ content|raw }}
+            {% endif %}
+
+            {% set aside = block("aside") is defined ? block("aside") : null %}
+            {% if  aside is defined and aside is not empty %}
+                {{ aside|raw }}
+            {% endif %}
+        </main>
+    {% endblock %}
+
+{% endblock %}

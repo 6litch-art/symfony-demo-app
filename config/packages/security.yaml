@@ -82,13 +82,19 @@ security:
           # allow authentication using a form or HTTP basic
           http_basic: ~
           entry_point: Base\Security\LoginFormAuthenticator
+
           form_login:
             use_referer: true
 
+            default_target_path: /backoffice
+            login_path: /rescue
+            check_path: /rescue
+            failure_path: /rescue
+            use_forward: false
+
           logout:
             path: security_logoutRequest
-            target: security_logout
-
+            target: /
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
